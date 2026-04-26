@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linear Equation Solver</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; color: #1a1a2e; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+    .card-title { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+    .var-labels { display: grid; grid-template-columns: 32px 1fr 1fr 1fr 20px 1fr; gap: 8px; margin-bottom: 4px; }
+    .var-label { font-size: 13px; color: #4f46e5; text-align: center; font-weight: 700; }
+    .row-input { display: grid; grid-template-columns: 32px 1fr 1fr 1fr 20px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .eq-label { font-size: 12px; color: #aaa; text-align: center; font-weight: 500; }
+
+    input[type=number] {
+      width: 100%; padding: 9px 6px; text-align: center;
+      border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 15px;
+      outline: none; transition: border 0.2s, box-shadow 0.2s; background: #fafafa;
+    }
+    input[type=number]:focus { border-color: #4f46e5; background: #fff; box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
+    .sep { text-align: center; font-size: 20px; color: #ccc; line-height: 40px; }
+
+    .btn-solve {
+      width: 100%; padding: 13px; background: #4f46e5; color: #fff;
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+      cursor: pointer; margin-top: 0.75rem; transition: background 0.2s, transform 0.1s;
+    }
+    .btn-solve:hover { background: #4338ca; }
+    .btn-solve:active { transform: scale(0.98); }
+    .btn-solve:disabled { background: #a5b4fc; cursor: not-allowed; }
+
+    /* Result Cards */
+    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 0.5rem; }
+    .result-card { border-radius: 12px; padding: 1.1rem 0.5rem; text-align: center; border: 1.5px solid transparent; }
+    .result-card.x-card { background: #eef2ff; border-color: #c7d2fe; }
+    .result-card.y-card { background: #f0fdf4; border-color: #bbf7d0; }
+    .result-card.z-card { background: #fff7ed; border-color: #fed7aa; }
+    .result-var-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .x-card .result-var-label { color: #4f46e5; }
+    .y-card .result-var-label { color: #16a34a; }
+    .z-card .result-var-label { color: #ea580c; }
+    .result-var-name { font-size: 32px; font-weight: 800; margin-bottom: 2px; }
+    .x-card .result-var-name { color: #3730a3; }
+    .y-card .result-var-name { color: #15803d; }
+    .z-card .result-var-name { color: #c2410c; }
+    .result-var-eq { font-size: 18px; font-weight: 700; }
+    .x-card .result-var-eq { color: #4f46e5; }
+    .y-card .result-var-eq { color: #16a34a; }
+    .z-card .result-var-eq { color: #ea580c; }
+
+    /* Badge */
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 1rem; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-danger  { background: #fee2e2; color: #991b1b; }
+    .badge-info    { background: #dbeafe; color: #1e40af; }
+
+    /* Steps */
+    .step-block { border-left: 3px solid #e2e8f0; padding-left: 1rem; margin-bottom: 1rem; }
+    .step-label { font-size: 12px; color: #888; margin-bottom: 4px; font-weight: 600; }
+    .op-text { font-family: monospace; font-size: 12px; color: #4f46e5; background: #eef2ff; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 6px; }
+    .matrix-row { font-family: monospace; font-size: 13px; color: #1a1a2e; line-height: 2; }
+
+    /* Inverse */
+    .inv-step-block { background: #fafafa; border: 1px solid #f1f5f9; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; }
+    .inv-step-title { font-size: 12px; font-weight: 700; color: #7c3aed; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .inv-matrix-row { font-family: monospace; font-size: 12px; color: #374151; line-height: 1.9; }
+    .det-box { display: inline-block; background: #ede9fe; color: #5b21b6; font-family: monospace; font-size: 15px; font-weight: 700; padding: 6px 16px; border-radius: 8px; margin-top: 4px; }
+
+    /* Compare Table */
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 0.5rem; }
+    .compare-table th { background: #f8fafc; color: #555; font-weight: 600; padding: 10px 14px; text-align: center; border-bottom: 2px solid #e2e8f0; }
+    .compare-table td { padding: 10px 14px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .var-x { color: #4f46e5; font-weight: 800; font-size: 18px; }
+    .var-y { color: #16a34a; font-weight: 800; font-size: 18px; }
+    .var-z { color: #ea580c; font-weight: 800; font-size: 18px; }
+    .val-cell { font-family: monospace; font-size: 15px; font-weight: 600; color: #1a1a2e; }
+    .match-yes { color: #16a34a; font-size: 18px; font-weight: 700; }
+    .match-no  { color: #dc2626; font-size: 18px; font-weight: 700; }
+
+    .section-divider { display: flex; align-items: center; gap: 10px; margin: 0.5rem 0 1rem; color: #aaa; font-size: 12px; font-weight: 600; }
+    .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+    .hidden { display: none; }
+    .loading { text-align: center; color: #888; font-size: 14px; padding: 1rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Linear Equation Solver</h1>
+  <p class="subtitle">Gaussian Elimination + Inverse Matrix — คำนวณโดย Python (Flask)</p>
+
+  <div class="card">
+    <div class="card-title">ใส่สมการ (3 ตัวแปร)</div>
+    <div class="var-labels">
+      <div></div>
+      <div class="var-label">x</div>
+      <div class="var-label">y</div>
+      <div class="var-label">z</div>
+      <div></div>
+      <div class="var-label" style="color:#888;">=</div>
+    </div>
+    <div class="row-input">
+      <div class="eq-label">R1</div>
+      <input type="number" id="a00" value="1" step="any">
+      <input type="number" id="a01" value="1" step="any">
+      <input type="number" id="a02" value="1" step="any">
+      <span class="sep">|</span>
+      <input type="number" id="b0" value="6" step="any">
+    </div>
+    <div class="row-input">
+      <div class="eq-label">R2</div>
+      <input type="number" id="a10" value="2" step="any">
+      <input type="number" id="a11" value="3" step="any">
+      <input type="number" id="a12" value="1" step="any">
+      <span class="sep">|</span>
+      <input type="number" id="b1" value="10" step="any">
+    </div>
+    <div class="row-input">
+      <div class="eq-label">R3</div>
+      <input type="number" id="a20" value="1" step="any">
+      <input type="number" id="a21" value="2" step="any">
+      <input type="number" id="a22" value="3" step="any">
+      <span class="sep">|</span>
+      <input type="number" id="b2" value="13" step="any">
+    </div>
+    <button class="btn-solve" id="btn" onclick="solve()">แก้สมการ</button>
+  </div>
+
+  <div id="result-section" class="hidden">
+
+    <div class="card">
+      <div class="card-title">ขั้นตอน Gaussian Elimination</div>
+      <div id="steps"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">ผลลัพธ์ — Gaussian Elimination</div>
+      <div id="badge-area"></div>
+      <div id="result-grid" class="result-grid"></div>
+    </div>
+
+    <div id="inverse-section" class="hidden">
+      <div class="card">
+        <div class="card-title">⭐ Challenge — วิธี Inverse Matrix</div>
+        <div id="inverse-steps"></div>
+        <div class="section-divider">ผลลัพธ์ Inverse</div>
+        <div id="inverse-result-grid" class="result-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 เปรียบเทียบ Gaussian vs Inverse</div>
+        <table class="compare-table">
+          <thead>
+            <tr><th>ตัวแปร</th><th>Gaussian</th><th>Inverse</th><th>ตรงกัน</th></tr>
+          </thead>
+          <tbody id="compare-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+  function fmtRow(row) {
+    const vars = row.slice(0, 3).map(v => (v >= 0 ? ' ' : '') + v.toFixed(2)).join('   ');
+    return `[ ${vars}  |  ${row[3].toFixed(2)} ]`;
+  }
+
+  function fmtMat(mat) {
+    return mat.map(row =>
+      `<div class="inv-matrix-row">[ ${row.map(v => (v >= 0 ? ' ' : '') + v.toFixed(4)).join('   ')} ]</div>`
+    ).join('');
+  }
+
+  function resultCards(sol, gridId) {
+    const labels = ['x', 'y', 'z'];
+    const classes = ['x-card', 'y-card', 'z-card'];
+    document.getElementById(gridId).innerHTML = labels.map((l, i) => `
+      <div class="result-card ${classes[i]}">
+        <div class="result-var-label">ตัวแปร</div>
+        <div class="result-var-name">${l}</div>
+        <div class="result-var-eq">= ${parseFloat(sol[i].toFixed(4))}</div>
+      </div>
+    `).join('');
+  }
+
+  async function solve() {
+    const btn = document.getElementById('btn');
+    btn.disabled = true;
+    btn.textContent = 'กำลังคำนวณ...';
+
+    const matrix = [
+      [getVal('a00'), getVal('a01'), getVal('a02'), getVal('b0')],
+      [getVal('a10'), getVal('a11'), getVal('a12'), getVal('b1')],
+      [getVal('a20'), getVal('a21'), getVal('a22'), getVal('b2')],
+    ];
+
+    // ส่งไป Python (Flask)
+    const res = await fetch('/solve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ matrix })
+    });
+    const data = await res.json();
+
+    btn.disabled = false;
+    btn.textContent = 'แก้สมการ';
+
+    // แสดง Steps
+    const stepsHTML = data.steps.map(s => `
+      <div class="step-block">
+        ${s.op ? `<div class="op-text">${s.op}</div>` : `<div class="step-label">${s.label}</div>`}
+        ${s.matrix.map(r => `<div class="matrix-row">${fmtRow(r)}</div>`).join('')}
+      </div>
+    `).join('');
+    document.getElementById('steps').innerHTML = stepsHTML;
+    document.getElementById('result-section').classList.remove('hidden');
+
+    const badgeArea = document.getElementById('badge-area');
+    const invSection = document.getElementById('inverse-section');
+
+    if (data.status === 'no_solution') {
+      badgeArea.innerHTML = `<div class="badge badge-danger">❌ ไม่มีคำตอบ (Inconsistent System)</div>`;
+      document.getElementById('result-grid').innerHTML = '';
+      invSection.classList.add('hidden');
+    } else if (data.status === 'infinite_solution') {
+      badgeArea.innerHTML = `<div class="badge badge-info">∞ มีคำตอบอนันต์ (Infinite Solutions)</div>`;
+      document.getElementById('result-grid').innerHTML = '';
+      invSection.classList.add('hidden');
+    } else {
+      badgeArea.innerHTML = `<div class="badge badge-success">✅ มีคำตอบเดียว</div>`;
+      resultCards(data.gaussian, 'result-grid');
+
+      if (data.inverse) {
+        invSection.classList.remove('hidden');
+        const inv = data.inverse;
+
+        document.getElementById('inverse-steps').innerHTML = `
+          <div class="inv-step-block">
+            <div class="inv-step-title">Step 1 — Determinant</div>
+            <div class="det-box">det(A) = ${inv.det.toFixed(4)}</div>
+          </div>
+          <div class="inv-step-block">
+            <div class="inv-step-title">Step 2 — Cofactor Matrix</div>
+            ${fmtMat(inv.cofactor)}
+          </div>
+          <div class="inv-step-block">
+            <div class="inv-step-title">Step 3 — Adjugate</div>
+            ${fmtMat(inv.adjugate)}
+          </div>
+          <div class="inv-step-block">
+            <div class="inv-step-title">Step 4 — A⁻¹ = Adjugate / det(A)</div>
+            ${fmtMat(inv.inv)}
+          </div>
+          <div class="inv-step-block">
+            <div class="inv-step-title">Step 5 — x = A⁻¹ × B</div>
+            ${inv.solution.map((v, i) => `<div class="inv-matrix-row">${['x','y','z'][i]} = ${v.toFixed(4)}</div>`).join('')}
+          </div>
+        `;
+
+        resultCards(inv.solution, 'inverse-result-grid');
+
+        const labels = ['x', 'y', 'z'];
+        const varClasses = ['var-x', 'var-y', 'var-z'];
+        document.getElementById('compare-body').innerHTML = labels.map((l, i) => {
+          const match = Math.abs(data.gaussian[i] - inv.solution[i]) < 1e-6;
+          return `<tr>
+            <td><span class="${varClasses[i]}">${l}</span></td>
+            <td class="val-cell">${data.gaussian[i].toFixed(4)}</td>
+            <td class="val-cell">${inv.solution[i].toFixed(4)}</td>
+            <td class="${match ? 'match-yes' : 'match-no'}">${match ? '✓' : '✗'}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        invSection.classList.add('hidden');
+      }
+    }
+  }
+</script>
+</body>
+</html>
