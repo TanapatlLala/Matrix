@@ -7,24 +7,33 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; color: #1a1a2e; min-height: 100vh; padding: 2rem 1rem; }
-    .container { max-width: 700px; margin: 0 auto; }
+    .container { max-width: 750px; margin: 0 auto; }
     h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
     .subtitle { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
     .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
     .card-title { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
 
-    .var-labels { display: grid; grid-template-columns: 32px 1fr 1fr 1fr 20px 1fr; gap: 8px; margin-bottom: 4px; }
-    .var-label { font-size: 13px; color: #4f46e5; text-align: center; font-weight: 700; }
-    .row-input { display: grid; grid-template-columns: 32px 1fr 1fr 1fr 20px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
-    .eq-label { font-size: 12px; color: #aaa; text-align: center; font-weight: 500; }
+    /* N selector */
+    .n-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .n-selector label { font-size: 14px; font-weight: 600; color: #374151; }
+    .n-input { width: 64px; padding: 8px 10px; text-align: center; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 15px; outline: none; }
+    .n-input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
+    .btn-build { padding: 8px 18px; background: #4f46e5; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-build:hover { background: #4338ca; }
 
-    input[type=number] {
-      width: 100%; padding: 9px 6px; text-align: center;
-      border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 15px;
+    /* Dynamic table */
+    .eq-table { width: 100%; border-collapse: separate; border-spacing: 6px; }
+    .eq-table th { font-size: 13px; color: #4f46e5; font-weight: 700; text-align: center; padding: 4px 2px; }
+    .eq-table th.rhs-th { color: #888; }
+    .eq-table td { text-align: center; }
+    .eq-table td.row-label { font-size: 12px; color: #aaa; font-weight: 500; width: 32px; }
+    .eq-table td.sep-cell { font-size: 20px; color: #ccc; width: 16px; }
+    input.coef {
+      width: 100%; padding: 9px 4px; text-align: center;
+      border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px;
       outline: none; transition: border 0.2s, box-shadow 0.2s; background: #fafafa;
     }
-    input[type=number]:focus { border-color: #4f46e5; background: #fff; box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
-    .sep { text-align: center; font-size: 20px; color: #ccc; line-height: 40px; }
+    input.coef:focus { border-color: #4f46e5; background: #fff; box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
 
     .btn-solve {
       width: 100%; padding: 13px; background: #4f46e5; color: #fff;
@@ -34,25 +43,18 @@
     .btn-solve:hover { background: #4338ca; }
     .btn-solve:active { transform: scale(0.98); }
     .btn-solve:disabled { background: #a5b4fc; cursor: not-allowed; }
+    .btn-rand { background: #8b5cf6; }
+    .btn-rand:hover { background: #7c3aed; }
 
     /* Result Cards */
-    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 0.5rem; }
-    .result-card { border-radius: 12px; padding: 1.1rem 0.5rem; text-align: center; border: 1.5px solid transparent; }
-    .result-card.x-card { background: #eef2ff; border-color: #c7d2fe; }
-    .result-card.y-card { background: #f0fdf4; border-color: #bbf7d0; }
-    .result-card.z-card { background: #fff7ed; border-color: #fed7aa; }
-    .result-var-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
-    .x-card .result-var-label { color: #4f46e5; }
-    .y-card .result-var-label { color: #16a34a; }
-    .z-card .result-var-label { color: #ea580c; }
-    .result-var-name { font-size: 32px; font-weight: 800; margin-bottom: 2px; }
-    .x-card .result-var-name { color: #3730a3; }
-    .y-card .result-var-name { color: #15803d; }
-    .z-card .result-var-name { color: #c2410c; }
-    .result-var-eq { font-size: 18px; font-weight: 700; }
-    .x-card .result-var-eq { color: #4f46e5; }
-    .y-card .result-var-eq { color: #16a34a; }
-    .z-card .result-var-eq { color: #ea580c; }
+    .result-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 0.5rem; }
+    .result-card {
+      border-radius: 12px; padding: 1rem 1.25rem; text-align: center;
+      border: 1.5px solid #c7d2fe; background: #eef2ff; min-width: 80px; flex: 1;
+    }
+    .result-var-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; color: #4f46e5; }
+    .result-var-name { font-size: 28px; font-weight: 800; margin-bottom: 2px; color: #3730a3; }
+    .result-var-eq { font-size: 16px; font-weight: 700; color: #4f46e5; }
 
     /* Badge */
     .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 1rem; }
@@ -66,20 +68,37 @@
     .op-text { font-family: monospace; font-size: 12px; color: #4f46e5; background: #eef2ff; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 6px; }
     .matrix-row { font-family: monospace; font-size: 13px; color: #1a1a2e; line-height: 2; }
 
+    /* Back substitution steps */
+    .back-step { font-family: monospace; font-size: 13px; color: #1a1a2e; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 12px; margin-bottom: 6px; line-height: 1.6; }
+    .back-step-highlight { color: #4f46e5; font-weight: 700; }
+
     /* Inverse */
     .inv-step-block { background: #fafafa; border: 1px solid #f1f5f9; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; }
     .inv-step-title { font-size: 12px; font-weight: 700; color: #7c3aed; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
     .inv-matrix-row { font-family: monospace; font-size: 12px; color: #374151; line-height: 1.9; }
-    .det-box { display: inline-block; background: #ede9fe; color: #5b21b6; font-family: monospace; font-size: 15px; font-weight: 700; padding: 6px 16px; border-radius: 8px; margin-top: 4px; }
+
+    /* ── det box แบบใหม่: multiline pre ── */
+    .det-box {
+      display: block;
+      background: #ede9fe;
+      color: #5b21b6;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin-top: 4px;
+      white-space: pre;          /* รักษาการขึ้นบรรทัดและช่องว่าง */
+      overflow-x: auto;          /* scroll ถ้าหน้าจอแคบ */
+      line-height: 1.7;
+    }
 
     /* Compare Table */
     .compare-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 0.5rem; }
     .compare-table th { background: #f8fafc; color: #555; font-weight: 600; padding: 10px 14px; text-align: center; border-bottom: 2px solid #e2e8f0; }
     .compare-table td { padding: 10px 14px; text-align: center; border-bottom: 1px solid #f1f5f9; }
     .compare-table tr:last-child td { border-bottom: none; }
-    .var-x { color: #4f46e5; font-weight: 800; font-size: 18px; }
-    .var-y { color: #16a34a; font-weight: 800; font-size: 18px; }
-    .var-z { color: #ea580c; font-weight: 800; font-size: 18px; }
+    .var-highlight { color: #4f46e5; font-weight: 800; font-size: 16px; }
     .val-cell { font-family: monospace; font-size: 15px; font-weight: 600; color: #1a1a2e; }
     .match-yes { color: #16a34a; font-size: 18px; font-weight: 700; }
     .match-no  { color: #dc2626; font-size: 18px; font-weight: 700; }
@@ -87,7 +106,9 @@
     .section-divider { display: flex; align-items: center; gap: 10px; margin: 0.5rem 0 1rem; color: #aaa; font-size: 12px; font-weight: 600; }
     .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
     .hidden { display: none; }
-    .loading { text-align: center; color: #888; font-size: 14px; padding: 1rem; }
+
+    .btn-row { display: flex; gap: 12px; margin-top: 0.75rem; }
+    .btn-row .btn-solve { margin-top: 0; }
   </style>
 </head>
 <body>
@@ -96,40 +117,20 @@
   <p class="subtitle">Gaussian Elimination + Inverse Matrix — คำนวณโดย Python (Flask)</p>
 
   <div class="card">
-    <div class="card-title">ใส่สมการ (3 ตัวแปร)</div>
-    <div class="var-labels">
-      <div></div>
-      <div class="var-label">x</div>
-      <div class="var-label">y</div>
-      <div class="var-label">z</div>
-      <div></div>
-      <div class="var-label" style="color:#888;">=</div>
+    <div class="card-title">เลือกจำนวนตัวแปร</div>
+    <div class="n-selector">
+      <label>จำนวนตัวแปร (n):</label>
+      <input type="number" class="n-input" id="n-val" value="3" min="2" max="6">
+      <button class="btn-build" onclick="buildTable()">สร้างตาราง</button>
     </div>
-    <div class="row-input">
-      <div class="eq-label">R1</div>
-      <input type="number" id="a00" value="1" step="any">
-      <input type="number" id="a01" value="1" step="any">
-      <input type="number" id="a02" value="1" step="any">
-      <span class="sep">|</span>
-      <input type="number" id="b0" value="6" step="any">
+
+    <div class="card-title">ใส่สมการ</div>
+    <div id="eq-table-wrap"></div>
+
+    <div class="btn-row">
+      <button class="btn-solve btn-rand" onclick="randomize()">สุ่มตัวเลข</button>
+      <button class="btn-solve" id="btn" onclick="solve()">แก้สมการ</button>
     </div>
-    <div class="row-input">
-      <div class="eq-label">R2</div>
-      <input type="number" id="a10" value="2" step="any">
-      <input type="number" id="a11" value="3" step="any">
-      <input type="number" id="a12" value="1" step="any">
-      <span class="sep">|</span>
-      <input type="number" id="b1" value="10" step="any">
-    </div>
-    <div class="row-input">
-      <div class="eq-label">R3</div>
-      <input type="number" id="a20" value="1" step="any">
-      <input type="number" id="a21" value="2" step="any">
-      <input type="number" id="a22" value="3" step="any">
-      <span class="sep">|</span>
-      <input type="number" id="b2" value="13" step="any">
-    </div>
-    <button class="btn-solve" id="btn" onclick="solve()">แก้สมการ</button>
   </div>
 
   <div id="result-section" class="hidden">
@@ -137,6 +138,13 @@
     <div class="card">
       <div class="card-title">ขั้นตอน Gaussian Elimination</div>
       <div id="steps"></div>
+    </div>
+
+    <div id="back-sub-section" class="hidden">
+      <div class="card">
+        <div class="card-title">ขั้นตอน Back Substitution</div>
+        <div id="back-steps"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -147,14 +155,14 @@
 
     <div id="inverse-section" class="hidden">
       <div class="card">
-        <div class="card-title">⭐ Challenge — วิธี Inverse Matrix</div>
+        <div class="card-title">Challenge — วิธี Inverse Matrix</div>
         <div id="inverse-steps"></div>
         <div class="section-divider">ผลลัพธ์ Inverse</div>
         <div id="inverse-result-grid" class="result-grid"></div>
       </div>
 
       <div class="card">
-        <div class="card-title">📊 เปรียบเทียบ Gaussian vs Inverse</div>
+        <div class="card-title">เปรียบเทียบ Gaussian vs Inverse</div>
         <table class="compare-table">
           <thead>
             <tr><th>ตัวแปร</th><th>Gaussian</th><th>Inverse</th><th>ตรงกัน</th></tr>
@@ -168,11 +176,76 @@
 </div>
 
 <script>
-  function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+  let currentN = 3;
+
+  function getVarName(i) {
+    if (currentN <= 3) return ['x','y','z'][i];
+    return `x${i+1}`;
+  }
+
+  function buildTable(n) {
+    currentN = n || parseInt(document.getElementById('n-val').value) || 3;
+    if (currentN < 2) currentN = 2;
+    if (currentN > 6) currentN = 6;
+    document.getElementById('n-val').value = currentN;
+
+    let html = `<table class="eq-table"><thead><tr><th></th>`;
+    for (let i = 0; i < currentN; i++) html += `<th>${getVarName(i)}</th>`;
+    html += `<th class="sep-cell"></th><th class="rhs-th">=</th></tr></thead><tbody>`;
+
+    for (let r = 0; r < currentN; r++) {
+      html += `<tr><td class="row-label">R${r+1}</td>`;
+      for (let c = 0; c < currentN; c++) {
+        html += `<td><input class="coef" type="number" id="a${r}${c}" value="0" step="any"></td>`;
+      }
+      html += `<td class="sep-cell">|</td>`;
+      html += `<td><input class="coef" type="number" id="b${r}" value="0" step="any"></td></tr>`;
+    }
+    html += `</tbody></table>`;
+    document.getElementById('eq-table-wrap').innerHTML = html;
+
+    if (currentN === 3) {
+      const def = [[1,1,1,6],[2,3,1,10],[1,2,3,13]];
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) document.getElementById(`a${r}${c}`).value = def[r][c];
+        document.getElementById(`b${r}`).value = def[r][3];
+      }
+    }
+  }
+
+  function randomize() {
+    const n = currentN;
+    const getRand = () => Math.floor(Math.random() * 21) - 10;
+    const A = Array.from({length: n}, () => Array.from({length: n}, getRand));
+    const B = Array.from({length: n}, getRand);
+    const randType = Math.random();
+
+    if (randType < 0.25) {
+      for (let c = 0; c < n; c++) A[n-1][c] = A[0][c] + A[1][c];
+      B[n-1] = B[0] + B[1] + (Math.floor(Math.random() * 5) + 1);
+    } else if (randType < 0.5) {
+      for (let c = 0; c < n; c++) A[n-1][c] = A[0][c] + A[1][c];
+      B[n-1] = B[0] + B[1];
+    }
+
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) document.getElementById(`a${r}${c}`).value = A[r][c];
+      document.getElementById(`b${r}`).value = B[r];
+    }
+  }
+
+  function getMatrix() {
+    const n = currentN;
+    return Array.from({length: n}, (_, r) =>
+      [...Array.from({length: n}, (_, c) => parseFloat(document.getElementById(`a${r}${c}`).value) || 0),
+       parseFloat(document.getElementById(`b${r}`).value) || 0]
+    );
+  }
 
   function fmtRow(row) {
-    const vars = row.slice(0, 3).map(v => (v >= 0 ? ' ' : '') + v.toFixed(2)).join('   ');
-    return `[ ${vars}  |  ${row[3].toFixed(2)} ]`;
+    const n = row.length - 1;
+    const vars = row.slice(0, n).map(v => (v >= 0 ? ' ' : '') + v.toFixed(2)).join('   ');
+    return `[ ${vars}  |  ${row[n].toFixed(2)} ]`;
   }
 
   function fmtMat(mat) {
@@ -182,13 +255,11 @@
   }
 
   function resultCards(sol, gridId) {
-    const labels = ['x', 'y', 'z'];
-    const classes = ['x-card', 'y-card', 'z-card'];
-    document.getElementById(gridId).innerHTML = labels.map((l, i) => `
-      <div class="result-card ${classes[i]}">
+    document.getElementById(gridId).innerHTML = sol.map((v, i) => `
+      <div class="result-card">
         <div class="result-var-label">ตัวแปร</div>
-        <div class="result-var-name">${l}</div>
-        <div class="result-var-eq">= ${parseFloat(sol[i].toFixed(4))}</div>
+        <div class="result-var-name">${getVarName(i)}</div>
+        <div class="result-var-eq">= ${parseFloat(v.toFixed(4))}</div>
       </div>
     `).join('');
   }
@@ -198,13 +269,8 @@
     btn.disabled = true;
     btn.textContent = 'กำลังคำนวณ...';
 
-    const matrix = [
-      [getVal('a00'), getVal('a01'), getVal('a02'), getVal('b0')],
-      [getVal('a10'), getVal('a11'), getVal('a12'), getVal('b1')],
-      [getVal('a20'), getVal('a21'), getVal('a22'), getVal('b2')],
-    ];
+    const matrix = getMatrix();
 
-    // ส่งไป Python (Flask)
     const res = await fetch('/solve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -215,7 +281,7 @@
     btn.disabled = false;
     btn.textContent = 'แก้สมการ';
 
-    // แสดง Steps
+    // Gaussian steps
     const stepsHTML = data.steps.map(s => `
       <div class="step-block">
         ${s.op ? `<div class="op-text">${s.op}</div>` : `<div class="step-label">${s.label}</div>`}
@@ -227,18 +293,33 @@
 
     const badgeArea = document.getElementById('badge-area');
     const invSection = document.getElementById('inverse-section');
+    const backSection = document.getElementById('back-sub-section');
 
     if (data.status === 'no_solution') {
       badgeArea.innerHTML = `<div class="badge badge-danger">❌ ไม่มีคำตอบ (Inconsistent System)</div>`;
       document.getElementById('result-grid').innerHTML = '';
       invSection.classList.add('hidden');
+      backSection.classList.add('hidden');
     } else if (data.status === 'infinite_solution') {
       badgeArea.innerHTML = `<div class="badge badge-info">∞ มีคำตอบอนันต์ (Infinite Solutions)</div>`;
       document.getElementById('result-grid').innerHTML = '';
       invSection.classList.add('hidden');
+      backSection.classList.add('hidden');
     } else {
       badgeArea.innerHTML = `<div class="badge badge-success">✅ มีคำตอบเดียว</div>`;
       resultCards(data.gaussian, 'result-grid');
+
+      // Back substitution steps
+      if (data.back_steps && data.back_steps.length > 0) {
+        backSection.classList.remove('hidden');
+        document.getElementById('back-steps').innerHTML = data.back_steps.map((s, idx) => {
+          const varName = getVarName(currentN - 1 - idx);
+          const highlighted = s.replace(/x_\d+/, `<span class="back-step-highlight">${varName}</span>`);
+          return `<div class="back-step">${highlighted}</div>`;
+        }).join('');
+      } else {
+        backSection.classList.add('hidden');
+      }
 
       if (data.inverse) {
         invSection.classList.remove('hidden');
@@ -246,15 +327,15 @@
 
         document.getElementById('inverse-steps').innerHTML = `
           <div class="inv-step-block">
-            <div class="inv-step-title">Step 1 — Determinant</div>
-            <div class="det-box">det(A) = ${inv.det.toFixed(4)}</div>
+            <div class="inv-step-title">Step 1 — Determinant (คูณลง − คูณขึ้น)</div>
+            <pre class="det-box">${inv.det_step || ('det(A) = ' + inv.det.toFixed(4))}</pre>
           </div>
           <div class="inv-step-block">
             <div class="inv-step-title">Step 2 — Cofactor Matrix</div>
             ${fmtMat(inv.cofactor)}
           </div>
           <div class="inv-step-block">
-            <div class="inv-step-title">Step 3 — Adjugate</div>
+            <div class="inv-step-title">Step 3 — Adjugate (Transpose of Cofactor)</div>
             ${fmtMat(inv.adjugate)}
           </div>
           <div class="inv-step-block">
@@ -263,20 +344,19 @@
           </div>
           <div class="inv-step-block">
             <div class="inv-step-title">Step 5 — x = A⁻¹ × B</div>
-            ${inv.solution.map((v, i) => `<div class="inv-matrix-row">${['x','y','z'][i]} = ${v.toFixed(4)}</div>`).join('')}
+            ${inv.solution.map((v, i) => `<div class="inv-matrix-row">${getVarName(i)} = ${v.toFixed(4)}</div>`).join('')}
           </div>
         `;
 
         resultCards(inv.solution, 'inverse-result-grid');
 
-        const labels = ['x', 'y', 'z'];
-        const varClasses = ['var-x', 'var-y', 'var-z'];
-        document.getElementById('compare-body').innerHTML = labels.map((l, i) => {
-          const match = Math.abs(data.gaussian[i] - inv.solution[i]) < 1e-6;
+        document.getElementById('compare-body').innerHTML = data.gaussian.map((gv, i) => {
+          const iv = inv.solution[i];
+          const match = Math.abs(gv - iv) < 1e-6;
           return `<tr>
-            <td><span class="${varClasses[i]}">${l}</span></td>
-            <td class="val-cell">${data.gaussian[i].toFixed(4)}</td>
-            <td class="val-cell">${inv.solution[i].toFixed(4)}</td>
+            <td><span class="var-highlight">${getVarName(i)}</span></td>
+            <td class="val-cell">${gv.toFixed(4)}</td>
+            <td class="val-cell">${iv.toFixed(4)}</td>
             <td class="${match ? 'match-yes' : 'match-no'}">${match ? '✓' : '✗'}</td>
           </tr>`;
         }).join('');
@@ -285,6 +365,8 @@
       }
     }
   }
+
+  buildTable(3);
 </script>
 </body>
 </html>
